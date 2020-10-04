@@ -1,6 +1,6 @@
+require("dotenv").config();
 const express = require("express");
 const axios = require("axios");
-require("dotenv").config();
 const router = express.Router();
 
 function pingBody(obj) {
@@ -11,7 +11,114 @@ function pingBody(obj) {
     LeadData: {
       Target: "Lead.Ping",
       PartnerToken: process.env.PXOPENAPI_PARTNERTOKEN,
-      RequestTime: "2018-07-02 14:58:36",
+      AffiliateData: {
+        Id: process.env.PXOPENAPI_ID,
+        OfferId: process.env.PXOPENAPI_OFFERID,
+        SubId: "CD1332",
+        Sub2Id: "x25",
+        Source: "All",
+        VerifyAddress: "false",
+        RespondOnNoSale: "true",
+      },
+      ContactData: {
+        State: "NY",
+        ZIPCode: "90221",
+        IPAddress: "255.255.255.255",
+      },
+      QuoteRequest: {
+        QuoteType: "Auto",
+        Drivers: {
+          Driver: {
+            BirthDate: "1980-07-14",
+            MaritalStatus: "Divorced",
+            RelationshipToApplicant: "Self",
+            Gender: "Male",
+            LicenseState: "NY",
+            AgeLicensed: "16",
+            LicenseStatus: "Current",
+            LicenseEverSuspendedRevoked: "No",
+            Occupation: "Employeed",
+            YearsAtEmployer: "10",
+            Education: "Bachelors Degree",
+            RequiresSR22Filing: "No",
+            CreditRating: "Excellent",
+            Incidents: {
+              Violations: {
+                Violation: {
+                  Date: "2011-12-31",
+                  Description: "Careless driving",
+                },
+              },
+              MajorViolations: {
+                MajorViolation: {
+                  Date: "2011-12-31",
+                  Description: "DUI/DWAI",
+                  State: "NY",
+                },
+              },
+              Accidents: {
+                Accident: {
+                  AccidentDate: "2011-12-31",
+                  Description: "Collided with another car",
+                  AtFault: "Yes",
+                  Damage: "People",
+                  Amount: "1000",
+                },
+              },
+              Claims: {
+                Claim: {
+                  ClaimDate: "2011-12-31",
+                  Description: "Act of Nature",
+                  PaidAmount: "50000",
+                  Damage: "People",
+                },
+              },
+            },
+          },
+        },
+        Vehicles: {
+          Vehicle: {
+            VIN: "1N6BD06T070000000",
+            Year: "2011",
+            Make: "BMW",
+            Model: "1 Series 128I",
+            Garage: "No Cover",
+            Ownership: "No",
+            PrimaryUse: "Commute To/From Work",
+            AnnualMiles: "2500",
+            WeeklyCommuteDays: "5",
+            OneWayDistance: "0",
+            ComphrensiveDeductible: "100",
+            CollisionDeductible: "100",
+          },
+        },
+        Insurance: {
+          CurrentPolicy: {
+            InsuranceCompany: "21st Century",
+            ExpirationDate: "2012-01-31",
+            InsuredSince: "2011-01-31",
+          },
+          RequestedPolicy: {
+            CoverageType: "Superior Protection",
+            BodilyInjury: "25/50",
+            PropertyDamage: "10000",
+          },
+        },
+      },
+    },
+  };
+}
+
+function postBody(obj) {
+  return {
+    type: "jsonwsp/request",
+    version: "1.0",
+    methodname: "Lead.Post",
+    LeadData: {
+      Target: "Lead.Post",
+      PartnerToken: process.env.PXOPENAPI_PARTNERTOKEN,
+      RequestTime: "2020-10-02 14:58:36",
+      TransactionId: obj.TransactionID,
       UserAgent:
         "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36",
       OriginalURL: "http://www.exampleURL.com",
@@ -32,9 +139,16 @@ function pingBody(obj) {
         ClickConsentID: "",
       },
       ContactData: {
+        FirstName: "Johny",
+        LastName: "DoeDe",
+        Address: "1 Little West 12th",
+        City: "New York",
         State: "NY",
-        ZIPCode: "90001",
-        IPAddress: "255.255.255.255",
+        ZIPCode: "90200",
+        EmailAddress: "test@testemail.com",
+        PhoneNumber: "6367171795",
+        DayPhoneNumber: "6367171795",
+        IPAddress: "255.255.255.254",
         ResidenceType: "Dorm / Student housing",
         YearsAtResidence: "1",
         MonthsAtResidence: "4",
@@ -43,6 +157,8 @@ function pingBody(obj) {
         QuoteType: "Auto",
         Drivers: {
           Driver: {
+            FirstName: "John",
+            LastName: "Dummy",
             BirthDate: "1980-07-14",
             MaritalStatus: "Divorced",
             RelationshipToApplicant: "Self",
@@ -135,10 +251,32 @@ function pingBody(obj) {
 
 router.post("/ping", async (req, res) => {
   const { data } = req.body;
+
+  try {
+    const responsePing = await axios.post(
+      "http://api.open.stagingpx.com/px",
+      pingBody(data)
+    );
+
+    // const responsePost = await axios.post(
+    //   "http://api.open.stagingpx.com/px",
+    //   postBody(responsePing.data)
+    // );
+
+    console.log(responsePing.data);
+
+    res.send(responsePing.data);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+router.post("/post", async (req, res) => {
+  const { data } = req.body;
   try {
     const response = await axios.post(
       "http://api.open.stagingpx.com/px",
-      pingBody(data)
+      postBody({ TransactionID: "708D8D8D-190F-47B4-8A29-00032D859F41" })
     );
     console.log(response.data);
     res.send(response.data);
